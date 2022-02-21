@@ -1,0 +1,309 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.af.user.mapper.UserMapper">
+    <resultMap id="userResultMap" type="com.af.user.api.entity.User">
+        <id column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="phone" property="phone"/>
+        <result column="avatar_url" property="avatarUrl"/>
+        <result column="email" property="email"/>
+        <result column="sex" property="sex"/>
+        <result column="union_id" property="unionId"/>
+        <result column="open_id" property="openId"/>
+        <result column="student_id" property="studentId"/>
+        <result column="college_id" property="collegeId"/>
+        <result column="major_class_id" property="majorClassId"/>
+        <result column="create_date" property="createDate" javaType="java.util.Date" jdbcType="TIMESTAMP"/>
+        <result column="modify_date" property="modifyDate" javaType="java.util.Date" jdbcType="TIMESTAMP"/>
+        <result column="is_deleted" property="isDeleted" />
+        <collection property="roleList" ofType="String" select="selectRoles" column="id"/>
+    </resultMap>
+
+    <resultMap id="studentVoResultMap" type="com.af.user.api.vo.StudentVo">
+        <id column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="phone" property="phone"/>
+        <result column="avatar_url" property="avatarUrl"/>
+        <result column="email" property="email"/>
+        <result column="sex" property="sex"/>
+        <result column="union_id" property="unionId"/>
+        <result column="open_id" property="openId"/>
+        <result column="student_id" property="studentId"/>
+        <association property="college" javaType="com.af.user.api.entity.College">
+            <id column="c_id" property="id"/>
+            <result column="c_name" property="name"/>
+            <result column="college_id" property="collegeId"/>
+        </association>
+        <association property="major" javaType="com.af.user.api.entity.Major">
+            <id column="m_id" property="id"/>
+            <result column="major_name" property="majorName"/>
+            <result column="class_no" property="classNo"/>
+            <result column="major_id" property="majorId"/>
+            <result column="grade" property="grade"/>
+            <result column="college_id" property="collegeId"/>
+        </association>
+    </resultMap>
+
+    <resultMap id="userVoResultMap" type="com.af.user.api.vo.UserVo">
+        <id column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="phone" property="phone"/>
+        <result column="avatar_url" property="avatarUrl"/>
+        <result column="email" property="email"/>
+        <result column="sex" property="sex"/>
+        <result column="union_id" property="unionId"/>
+        <result column="open_id" property="openId"/>
+        <result column="student_id" property="studentId"/>
+        <association property="college" javaType="com.af.user.api.entity.College">
+            <id column="c_id" property="id"/>
+            <result column="c_name" property="name"/>
+            <result column="college_id" property="collegeId"/>
+        </association>
+        <association property="major" javaType="com.af.user.api.entity.Major">
+            <id column="m_id" property="id"/>
+            <result column="major_name" property="majorName"/>
+            <result column="class_no" property="classNo"/>
+            <result column="major_id" property="majorId"/>
+            <result column="grade" property="grade"/>
+            <result column="college_id" property="collegeId"/>
+        </association>
+        <collection property="roleList" ofType="String" select="selectRoles" column="id"/>
+    </resultMap>
+
+    <sql id="userColumns">
+        SELECT
+            a.id,
+            a.name,
+            a.password,
+            a.phone,
+            a.avatar_url,
+            a.email,
+            a.sex,
+            a.student_id,
+            a.union_id,
+            a.open_id,
+            a.college_id,
+            a.major_class_id,
+            a.create_date,
+            a.modify_date,
+            a.is_deleted
+        FROM user a
+    </sql>
+
+
+    <sql id="selectUserInfo">
+    SELECT
+        a.id,
+        a.name,
+        a.phone,
+        a.avatar_url,
+        a.email,
+        a.sex,
+        a.student_id,
+        a.union_id,
+        a.open_id,
+        a.college_id,
+        a.major_class_id,
+        a.create_date,
+        a.modify_date,
+        a.is_deleted
+    FROM user a
+    </sql>
+
+    <sql id="selectStudentVoInfo">
+        SELECT
+            a.id,
+            a.name,
+            a.phone,
+            a.avatar_url,
+            a.email,
+            a.sex,
+            a.student_id,
+            a.union_id,
+            a.open_id,
+            a.college_id,
+            a.major_class_id,
+            a.create_date,
+            a.modify_date,
+            a.is_deleted,
+            c.id as c_id,
+            c.name as c_name,
+            c.college_id,
+            m.id as m_id,
+            m.major_name,
+            m.major_id,
+            m.grade,
+            m.class_no,
+            m.college_id
+        FROM user a left join college c on a.college_id = c.college_id left join major m on a.major_class_id = m.id
+    </sql>
+
+
+    <!-- where 条件 -->
+    <sql id="whereColumnList">
+        <if test="email != null and email != ''">
+            and a.email = #{email}
+        </if>
+        <if test="phone != null and phone != ''">
+            and a.phone = #{phone}
+        </if>
+        <if test="password != null and password != ''">
+            and a.password = #{password}
+        </if>
+        <if test="sex != null and sex != ''">
+            and a.sex = #{sex}
+        </if>
+    </sql>
+
+    <select id="findStudentList" resultMap="studentVoResultMap">
+        <include refid="selectStudentVoInfo"/>
+        WHERE a.is_deleted = 0
+        <if test="studentId != null and studentId != ''">
+            and a.student_id = #{studentId}
+        </if>
+        <if test="majorIdList != null and majorIdList.size() > 0">
+            and a.major_class_id in
+            <foreach collection="majorIdList" separator="," item="id" open="(" close=")">
+                #{id}
+            </foreach>
+        </if>
+        <if test="collegeIdList != null and collegeIdList.size() > 0">
+            <if test="majorIdList.size() == 0">
+                and
+            </if>
+            <if test="majorIdList.size() > 0">
+                or
+            </if>
+            a.college_id in
+            <foreach collection="collegeIdList" separator="," item="id" open="(" close=")">
+                #{id}
+            </foreach>
+        </if>
+    </select>
+
+    <select id="findOwnInfo" resultMap="userVoResultMap">
+        <include refid="selectStudentVoInfo"/>
+        WHERE a.is_deleted = 0 AND a.id = #{id}
+    </select>
+
+    <select id="existStudentId" resultType="int">
+        select ifnull((select 1 from user where student_id = #{studentId} and is_deleted = 0 limit 1), 0)
+    </select>
+
+    <select id="existPhone" resultType="int">
+        select ifnull((select 1 from user where phone = #{phone} and is_deleted = 0 limit 1), 0)
+    </select>
+
+   <select id="existEmail" resultType="int">
+        select ifnull((select 1 from user where email = #{email} and is_deleted = 0 limit 1), 0)
+    </select>
+
+    <select id="selectRoles" resultType="String">
+        select r.role_code
+        from user a left join user_role ur on a.id = ur.user_id left join role r on r.id = ur.role_id
+        where a.id = #{id}
+    </select>
+
+
+
+
+    <select id="getById" resultMap="userResultMap">
+        <include refid="userColumns"/>
+        WHERE a.id = #{id}
+    </select>
+
+    <select id="get" resultMap="userResultMap">
+        <include refid="userColumns"/>
+        WHERE a.is_deleted = 0
+        <include refid="whereColumnList"/>
+    </select>
+
+
+
+
+
+
+    <!-- 新增用户 -->
+    <insert id="insert">
+        insert into user (
+            id,
+            name,
+            phone,
+            avatar_url,
+            email,
+            password,
+            sex,
+            student_id,
+            union_id,
+            open_id,
+            college_id,
+            major_class_id,
+            create_date,
+            modify_date,
+            is_deleted
+        ) values (
+            #{id},
+            #{name},
+            #{phone},
+            #{avatarUrl},
+            #{email},
+            #{password},
+            #{sex, jdbcType=INTEGER},
+            #{studentId},
+            #{unionId},
+            #{openId},
+            #{collegeId},
+            #{majorClassId},
+            #{createDate, jdbcType=TIMESTAMP, javaType=java.util.Date},
+            #{modifyDate, jdbcType=TIMESTAMP, javaType=java.util.Date},
+            #{isDeleted, jdbcType=INTEGER}
+        );
+    </insert>
+
+    <!-- 更新用户 -->
+    <update id="update">
+        update user set
+        <if test="name != null">
+            name = #{name} ,
+        </if>
+        <if test="phone != null">
+            phone = #{phone} ,
+        </if>
+        <if test="avatarUrl != null">
+            avatar_url = #{avatarUrl} ,
+        </if>
+        <if test="email != null">
+            email = #{email} ,
+        </if>
+        <if test="sex != null">
+            sex = #{sex, jdbcType=INTEGER} ,
+        </if>
+        <if test="unionId != null">
+            union_id = #{unionId} ,
+        </if>
+        <if test="openId != null">
+            open_id = #{openId} ,
+        </if>
+        <if test="createDate != null">
+            create_date = #{createDate, jdbcType=TIMESTAMP} ,
+        </if>
+        <if test="password != null">
+            password = #{password},
+        </if>
+        modify_date = #{modifyDate, jdbcType=TIMESTAMP, javaType=java.util.Date}
+        where id = #{id}
+    </update>
+
+    <update id="deleteById">
+        UPDATE user set is_deleted = 1 WHERE id = #{id}
+    </update>
+
+    <delete id="deleteAll">
+        DELETE FROM sys_user
+        WHERE id in
+        <foreach item="item" index="index" collection="ids" open="("
+                 separator="," close=")">#{item}
+        </foreach>
+    </delete>
+
+</mapper>

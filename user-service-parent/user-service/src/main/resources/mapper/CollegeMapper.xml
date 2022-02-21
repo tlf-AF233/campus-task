@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.af.user.mapper.CollegeMapper">
+    <resultMap id="collegeResultMap" type="com.af.user.api.entity.College">
+        <id column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="college_id" property="collegeId"/>
+        <result column="is_deleted" property="isDeleted" />
+    </resultMap>
+
+    <resultMap id="collegeMajorVoResultMap" type="com.af.user.api.vo.CollegeMajorVo">
+        <result column="name" property="name"/>
+        <result column="college_id" property="collegeId"/>
+        <collection property="majorVoList" ofType="com.af.user.api.entity.Major" select="selectMajors" column="college_id"/>
+    </resultMap>
+
+    <resultMap id="collegeTeacherVoResultMap" type="com.af.user.api.vo.CollegeTeacherVo">
+        <result column="name" property="name"/>
+        <result column="college_id" property="collegeId"/>
+        <collection property="teacherList" ofType="com.af.user.api.entity.User" select="selectTeachers" column="college_id"/>
+    </resultMap>
+
+    <sql id="selectCollege">
+        SELECT
+            a.id,
+            a.name,
+            a.college_id,
+            a.is_deleted
+        FROM college a
+    </sql>
+
+    <sql id="selectCollegeInfo">
+        SELECT
+            a.name,
+            a.college_id
+        FROM college a
+    </sql>
+
+    <!-- where 条件 -->
+<!--    <sql id="whereColumnList">-->
+<!--        <if test="email != null and email != ''">-->
+<!--            and a.email = #{email}-->
+<!--        </if>-->
+<!--        <if test="phone != null and phone != ''">-->
+<!--            and a.phone = #{phone}-->
+<!--        </if>-->
+<!--    </sql>-->
+
+    <select id="findList" resultMap="collegeResultMap">
+        <include refid="selectCollege"/>
+        WHERE a.is_deleted = 0
+    </select>
+
+
+
+    <select id="selectCollegeMajorVo" resultMap="collegeMajorVoResultMap">
+        <include refid="selectCollegeInfo"/>
+        WHERE a.is_deleted = 0
+    </select>
+
+    <select id="selectCollegeTeacherVo" resultMap="collegeTeacherVoResultMap">
+        <include refid="selectCollegeInfo"/>
+        WHERE a.is_deleted = 0
+    </select>
+
+
+
+
+    <insert id="insert">
+        insert into college (
+            id,
+            name,
+            college_id,
+            create_date,
+            modify_date,
+            is_deleted
+        ) values (
+            #{id},
+            #{name},
+            #{collegeId},
+            #{createDate, jdbcType=TIMESTAMP, javaType=java.util.Date},
+            #{modifyDate, jdbcType=TIMESTAMP, javaType=java.util.Date},
+            #{isDeleted, jdbcType=INTEGER}
+        );
+    </insert>
+
+    <!-- 更新用户 -->
+    <update id="update">
+        update user set
+        <if test="name != null">
+            name = #{name} ,
+        </if>
+        <if test="phone != null">
+            phone = #{phone} ,
+        </if>
+        <if test="avatarId != null">
+            avatar_id = #{avatarId} ,
+        </if>
+        <if test="email != null">
+            email = #{email} ,
+        </if>
+        <if test="sex != null">
+            sex = #{sex, jdbcType=INTEGER} ,
+        </if>
+        <if test="born != null">
+            born = #{born} ,
+        </if>
+        <if test="userDesc != null">
+            user_desc = #{userDesc} ,
+        </if>
+        <if test="deptId != null">
+            dept_id = #{deptId} ,
+        </if>
+        <if test="status != null">
+            status = #{status, jdbcType=INTEGER} ,
+        </if>
+        <if test="parentUid != null">
+            parent_uid = #{parentUid} ,
+        </if>
+        <if test="street != null">
+            street = #{street} ,
+        </if>
+        <if test="county != null">
+            county = #{county} ,
+        </if>
+        <if test="city != null">
+            city = #{city} ,
+        </if>
+        <if test="province != null">
+            province = #{province} ,
+        </if>
+        <if test="loginTime != null">
+            login_time = #{loginTime, jdbcType=TIMESTAMP, javaType=java.util.Date} ,
+        </if>
+        <if test="lockTime != null">
+            lock_time = #{lockTime, jdbcType=TIMESTAMP, javaType=java.util.Date} ,
+        </if>
+        <if test="unionId != null">
+            union_id = #{unionId} ,
+        </if>
+        <if test="openId != null">
+            open_id = #{openId} ,
+        </if>
+        <if test="bczUid != null">
+            bcz_uid = #{bczUid} ,
+        </if>
+        <if test="signature != null">
+            signature = #{signature} ,
+        </if>
+        <if test="creator != null">
+            creator = #{creator} ,
+        </if>
+        <if test="createDate != null">
+            create_date = #{createDate, jdbcType=TIMESTAMP} ,
+        </if>
+        <if test="delFlag != null">
+            del_flag = #{delFlag, jdbcType=INTEGER} ,
+        </if>
+        <if test="applicationCode != null">
+            application_code = #{applicationCode} ,
+        </if>
+        <if test="modifier != null">
+            modifier = #{modifier} ,
+        </if>
+        modify_date = #{modifyDate, jdbcType=TIMESTAMP, javaType=java.util.Date}
+        where id = #{id}
+    </update>
+
+    <update id="deleteById">
+        UPDATE user set is_deleted = 1 WHERE id = #{id}
+    </update>
+
+    <delete id="deleteAll">
+        DELETE FROM sys_user
+        WHERE id in
+        <foreach item="item" index="index" collection="ids" open="("
+                 separator="," close=")">#{item}
+        </foreach>
+    </delete>
+
+</mapper>

@@ -1,0 +1,56 @@
+server:
+  port: 8801
+spring:
+  application:
+    name: user-service
+  datasource:
+    url: jdbc:mysql://localhost:3306/campus-user?useSSL=false&serverTimezone=CTT&characterEncoding=UTF-8
+    username: ${MYSQL_USERNAME:root}
+    password: ${MYSQL_PASSWORD:741236985}
+    type: com.zaxxer.hikari.HikariDataSource
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  cloud:
+    consul:
+      host: 127.0.0.1 #consul注册中心的ip地址
+      port: 8500 #consul注册中心端口
+      discovery:
+        register: true #是否需要注册
+        instance-id: ${spring.application.name}-1 #实例id(唯一标志)
+        service-name: ${spring.application.name} #服务的名称
+        prefer-ip-address: true #开启ip地址注册
+
+# mybatis配置
+mybatis:
+  type-aliases-package: com.af.user.api.entity
+  configuration:
+    # 驼峰转换
+    map-underscore-to-camel-case: true
+  mapper-locations: classpath:mapper/*.xml
+pagehelper:
+  helperDialect: mysql
+  reasonable: true
+  supportMethodsArguments: true
+  params: count=countSql
+
+# feign相关配置
+# feign相关配置
+feign:
+  httpclient:
+    enabled: false
+  okhttp:
+    enabled: true
+  hystrix:
+    enabled: true
+  user-service: localhost:8801
+  course-service: localhost:8802
+
+# hystrix配置
+hystrix:
+  shareSecurityContext: true
+  command:
+    default:
+      execution:
+        isolation:
+          thread:
+            timeoutInMilliseconds: 60000
+

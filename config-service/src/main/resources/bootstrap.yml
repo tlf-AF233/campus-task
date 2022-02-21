@@ -1,0 +1,20 @@
+server:
+  port: 8800
+spring:
+  application:
+    name: config-service
+  profiles:
+    active: native
+  cloud:
+    config:
+      server:
+        native:
+          search-locations: classpath:/config
+    consul:
+      host: 127.0.0.1 #consul注册中心的ip地址
+      port: 8500 #consul注册中心端口
+      discovery:
+        register: true #是否需要注册
+        instance-id: ${spring.application.name}-1 #实例id(唯一标志)
+        service-name: ${spring.application.name} #服务的名称
+        prefer-ip-address: true #开启ip地址注册

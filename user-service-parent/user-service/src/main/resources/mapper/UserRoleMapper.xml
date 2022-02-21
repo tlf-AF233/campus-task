@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.af.user.mapper.UserRoleMapper">
+    <resultMap id="userRoleResultMap" type="com.af.user.api.entity.UserRole">
+        <id column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="role_id" property="roleId"/>
+        <result column="is_deleted" property="isDeleted" />
+    </resultMap>
+
+    <sql id="selectUserRole">
+        SELECT
+            a.id,
+            a.user_id,
+            a.role_id
+        FROM user_role a
+    </sql>
+
+    <!-- where 条件 -->
+<!--    <sql id="whereColumnList">-->
+<!--        <if test="email != null and email != ''">-->
+<!--            and a.email = #{email}-->
+<!--        </if>-->
+<!--        <if test="phone != null and phone != ''">-->
+<!--            and a.phone = #{phone}-->
+<!--        </if>-->
+<!--    </sql>-->
+
+
+    <insert id="batchInsertUserRole">
+        insert into user_role (
+            id,
+            user_id,
+            role_id,
+            create_date,
+            modify_date,
+            is_deleted
+        ) values
+        <foreach collection="list" item="item" separator=",">
+            (
+             #{item.id}, #{item.userId}, #{item.roleId}, #{item.createDate},
+                #{item.modifyDate},#{item.isDeleted}
+                )
+        </foreach>
+    </insert>
+
+
+    <update id="deleteById">
+        UPDATE user_role set is_deleted = 1 WHERE user_id = #{id}
+    </update>
+
+</mapper>

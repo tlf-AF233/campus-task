@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.af.course.mapper.QuestionMapper">
+    <resultMap id="questionResultMap" type="com.af.course.api.entity.Question">
+        <id column="id" property="id"/>
+        <result column="course_id" property="courseId"/>
+        <result column="question_id" property="questionId"/>
+        <result column="question_name" property="questionName"/>
+        <result column="question_type" property="questionType"/>
+        <result column="question_difficulty" property="questionDifficulty"/>
+        <result column="score" property="score"/>
+        <result column="question_analysis" property="questionAnalysis"/>
+        <result column="question_answer" property="questionAnswer"/>
+        <result column="items" property="items" typeHandler="com.af.common.config.JsonObjectHandler"/>
+        <result column="create_date" property="createDate" javaType="java.util.Date" jdbcType="TIMESTAMP"/>
+        <result column="modify_date" property="modifyDate" javaType="java.util.Date" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <sql id="selectQuestion">
+        SELECT
+            a.id,
+            a.course_id,
+            a.question_id,
+            a.question_name,
+            a.question_type,
+            a.question_difficulty,
+            a.score,
+            a.question_analysis,
+            a.question_answer,
+            a.items,
+            a.create_date,
+            a.modify_date
+        FROM question a
+    </sql>
+
+    <!-- where 条件 -->
+    <sql id="whereColumnList">
+        <if test="questionId != null and questionId != ''">
+            and a.question_id = #{questionId}
+        </if>
+    </sql>
+
+    <select id="findList" resultMap="questionResultMap">
+        <include refid="selectQuestion"/>
+        WHERE a.is_deleted = 0
+        <include refid="whereColumnList"/>
+    </select>
+
+
+    <insert id="insert">
+        insert into question (
+            id,
+            course_id,
+            question_id,
+            question_name,
+            question_type,
+            question_difficulty,
+            score,
+            question_analysis,
+            question_answer,
+            items,
+            create_date,
+            modify_date,
+            is_deleted
+        ) values (
+            #{id},
+            #{courseId},
+            #{questionId},
+            #{questionName},
+            #{questionType},
+            #{questionDifficulty},
+            #{score},
+            #{questionAnalysis},
+            #{questionAnswer},
+            #{items, jdbcType=OTHER, typeHandler=com.af.common.config.JsonObjectHandler},
+            #{createDate, jdbcType=TIMESTAMP, javaType=java.util.Date},
+            #{modifyDate, jdbcType=TIMESTAMP, javaType=java.util.Date},
+            #{isDeleted, jdbcType=INTEGER}
+        );
+    </insert>
+
+    <select id="existQuestionId" resultType="int">
+        select ifnull((select 1 from question where question_id = #{questionId} and is_deleted = 0 limit 1), 0)
+    </select>
+
+    <update id="delete">
+        UPDATE question set is_deleted = 1 WHERE question_id = #{question_id}
+    </update>
+
+</mapper>

@@ -1,0 +1,9 @@
+spring:
+  application:
+    name: user-service
+  cloud:
+    config:
+      uri: http://localhost:8800
+      fail-fast: true # 在某些情况下，如果服务无法连接到配置服务器，则可能希望启动服务失败,客户端将以异常停止
+      retry:
+        max-attempts: 5 # 配置客户端重试，默认行为是重试6次，初始退避间隔为1000ms，指数乘数为1.1

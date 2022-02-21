@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.af.course.mapper.LessonMapper">
+    <resultMap id="lessonResultMap" type="com.af.course.api.entity.Lesson">
+        <id column="id" property="id"/>
+        <result column="course_id" property="courseId"/>
+        <result column="lesson_id" property="lessonId"/>
+        <result column="lesson_name" property="lessonName"/>
+        <result column="lesson_number" property="lessonNumber"/>
+        <result column="create_date" property="createDate" javaType="java.util.Date" jdbcType="TIMESTAMP"/>
+        <result column="modify_date" property="modifyDate" javaType="java.util.Date" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <sql id="selectLesson">
+        SELECT
+            a.id,
+            a.course_id,
+            a.lesson_id,
+            a.lesson_name,
+            a.lesson_number,
+            a.create_date,
+            a.modify_date
+        FROM lesson a
+    </sql>
+
+    <!-- where 条件 -->
+    <sql id="whereColumnList">
+        <if test="courseId != null and courseId != ''">
+            and a.course_id = #{courseId}
+        </if>
+    </sql>
+
+    <select id="findList" resultMap="lessonResultMap">
+        <include refid="selectLesson"/>
+        WHERE a.is_deleted = 0
+        <include refid="whereColumnList"/>
+    </select>
+
+    <select id="existLessonId" resultType="int">
+        select ifnull((select 1 from lesson where lesson_id = #{lessonId} and is_deleted = 0 limit 1), 0)
+    </select>
+
+    <insert id="insert">
+        insert into lesson (
+            id,
+            course_id,
+            lesson_id,
+            lesson_name,
+            lesson_number,
+            create_date,
+            modify_date,
+            is_deleted
+        ) values (
+            #{id},
+            #{courseId},
+            #{lessonId},
+            #{lessonName},
+            #{lessonNumber},
+            #{createDate, jdbcType=TIMESTAMP, javaType=java.util.Date},
+            #{modifyDate, jdbcType=TIMESTAMP, javaType=java.util.Date},
+            #{isDeleted, jdbcType=INTEGER}
+        );
+    </insert>
+
+
+    <update id="delete">
+        UPDATE lesson set is_deleted = 1 WHERE lesson_id = #{lessonId}
+    </update>
+
+</mapper>

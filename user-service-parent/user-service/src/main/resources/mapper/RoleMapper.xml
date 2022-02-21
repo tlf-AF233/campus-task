@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.af.user.mapper.RoleMapper">
+    <resultMap id="roleResultMap" type="com.af.user.api.entity.Role">
+        <id column="id" property="id"/>
+        <result column="role_name" property="roleName"/>
+        <result column="role_code" property="roleCode"/>
+    </resultMap>
+
+    <sql id="selectRole">
+        SELECT
+            a.id,
+            a.role_name,
+            a.role_code
+        FROM role a
+    </sql>
+
+<!-- where 条件 -->
+    <sql id="whereColumnList">
+        <if test="roleName != null and roleName != ''">
+            and a.role_name = #{roleName}
+        </if>
+        <if test="roleCode != null and roleCode != ''">
+            and a.role_code = #{roleCode}
+        </if>
+    </sql>
+
+    <select id="findList" resultMap="roleResultMap">
+        <include refid="selectRole"/>
+        where a.is_deleted = 0
+        <include refid="whereColumnList"/>
+    </select>
+
+
+</mapper>

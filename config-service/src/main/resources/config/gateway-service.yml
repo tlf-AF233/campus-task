@@ -1,0 +1,38 @@
+server:
+  port: 8080
+spring:
+  application:
+    name: gateway-service
+  cloud:
+    gateway:
+      routes:
+        - id: user-service
+          uri: http://localhost:8801
+          predicates:
+            - Path=/api/user/**
+          filters:
+            - StripPrefix=2
+
+        - id: course-service
+          uri: http://localhost:8802
+          predicates:
+            - Path=/api/course/**
+          filters:
+            - StripPrefix=2
+      # 跨域
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowedOrigins: "*"
+            allowedMethods: "*"
+            allowedHeaders: "*"
+
+ignore:
+  urls:
+    - /v2/api-docs
+    - /swagger-ui.html
+    - /swagger-resources/**
+    - /api/user/v1/user/login
+    - /api/user/v1/user/register
+    - /api/user/v1/college/list
+    - /api/**/v2/api-docs

@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.af.course.mapper.CourseMapper">
+    <resultMap id="courseResultMap" type="com.af.course.api.entity.Course">
+        <id column="id" property="id"/>
+        <result column="course_id" property="courseId"/>
+        <result column="course_name" property="courseName"/>
+        <result column="course_teacher" property="courseTeacher"/>
+        <result column="course_teacher_id" property="courseTeacherId"/>
+        <result column="college_id" property="collegeId"/>
+        <result column="create_date" property="createDate" javaType="java.util.Date" jdbcType="TIMESTAMP"/>
+        <result column="modify_date" property="modifyDate" javaType="java.util.Date" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+
+    <sql id="selectCourse">
+        SELECT
+            a.id,
+            a.course_id,
+            a.college_id,
+            a.course_name,
+            a.course_teacher,
+            a.course_teacher_id,
+            a.create_date,
+            a.modify_date
+        FROM course a
+    </sql>
+
+
+
+    <!-- where 条件 -->
+    <sql id="whereColumnList">
+        <if test="courseTeacherId != null and courseTeacherId != ''">
+            and a.course_teacher_id = #{courseTeacherId}
+        </if>
+    </sql>
+
+    <select id="findList" resultMap="courseResultMap">
+        <include refid="selectCourse"/>
+        WHERE a.is_deleted = 0
+        <include refid="whereColumnList"/>
+    </select>
+
+
+
+
+
+    <select id="searchCourseByKeyword" resultType="com.af.course.api.vo.CourseVo">
+        select
+            c.id,
+            c.course_id,
+            c.college_id,
+            co.name as collegeName,
+            c.course_name,
+            c.course_teacher,
+            c.course_teacher_id,
+            count(distinct t.user_id) as studentNumber
+        from course c left join trainee t on c.course_id = t.course_id
+            left join `campus-user`.college co on co.college_id = c.college_id
+        where c.is_deleted = 0
+        <if test="courseSearchKey != null and courseSearchKey != ''">
+            and (c.course_id = #{courseSearchKey}
+                    or c.course_name like concat(#{courseSearchKey}, '%')
+                    or c.course_teacher like concat(#{courseSearchKey}, '%')
+                )
+        </if>
+        <if test="collegeIdList != null and collegeIdList.size() > 0">
+        and c.college_id in
+            <foreach collection="collegeIdList" separator="," item="id" open="(" close=")">
+                #{id}
+            </foreach>
+        </if>
+        group by c.id
+    </select>
+
+
+    <insert id="insert">
+        insert into course (
+            id,
+            course_name,
+            course_teacher,
+            course_teacher_id,
+            course_id,
+            college_id,
+            create_date,
+            modify_date,
+            is_deleted
+        ) values (
+            #{id},
+            #{courseName},
+            #{courseTeacher},
+            #{courseTeacherId},
+            #{courseId},
+            #{collegeId},
+            #{createDate, jdbcType=TIMESTAMP, javaType=java.util.Date},
+            #{modifyDate, jdbcType=TIMESTAMP, javaType=java.util.Date},
+            #{isDeleted, jdbcType=INTEGER}
+        );
+    </insert>
+
+
+    <update id="delete">
+        UPDATE course set is_deleted = 1 WHERE course_id = #{courseId}
+    </update>
+
+</mapper>
