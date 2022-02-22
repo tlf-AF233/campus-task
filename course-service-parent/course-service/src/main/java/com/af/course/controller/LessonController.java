@@ -15,6 +15,8 @@ import io.swagger.annotations.ApiOperation;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 /**
  * @author Tanglinfeng
  * @date 2022/2/21 16:54
@@ -45,6 +47,15 @@ public class LessonController {
             throw new BusinessException(CourseResultCode.LESSON_ID_EXIST);
         }
         return new ResponseBean<>(lessonService.insert(lesson));
+    }
+
+    @ApiOperation("查询课时列表")
+    @GetMapping("/search")
+    public ResponseBean<List<Lesson>> findLessonList(@RequestParam("courseId") String courseId) {
+        Lesson lesson = new Lesson();
+        lesson.setCourseId(courseId);
+
+        return new ResponseBean<>(lessonService.findList(lesson));
     }
 
 }

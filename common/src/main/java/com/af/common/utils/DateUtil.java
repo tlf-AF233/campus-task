@@ -1,7 +1,10 @@
 package com.af.common.utils;
 
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
 /**
@@ -12,12 +15,11 @@ import java.util.Date;
  */
 public class DateUtil {
 
-    /**
-     * LocalDate转Date
-     * @param localDate
-     * @return
-     */
-    public static Date asDate(LocalDate localDate) {
-        return Date.from(localDate.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
+    public static final String FORMATTER = "yyyy-MM-dd HH:mm:ss";
+
+
+    public static String formatDateString(Date date) {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(FORMATTER);
+        return simpleDateFormat.format(date);
     }
 }

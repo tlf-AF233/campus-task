@@ -1,4 +1,4 @@
-package com.af.common.config;
+package com.af.common.configs;
 
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;

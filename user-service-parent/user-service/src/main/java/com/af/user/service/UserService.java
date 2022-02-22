@@ -68,7 +68,7 @@ public class UserService extends BaseService<UserMapper, User> {
             throw new BusinessException(UserResultCode.OLD_PASSWORD_WRONG);
         }
         user.setPassword(BCrypt.hashpw(newPassword));
-        user.setModifyDate(DateUtil.asDate(LocalDate.now()));
+        user.setModifyDate(new Date());
         return this.mapper.update(user) > 0;
     }
 

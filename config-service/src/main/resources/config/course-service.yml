@@ -26,6 +26,8 @@ mybatis:
     # 驼峰转换
     map-underscore-to-camel-case: true
   mapper-locations: classpath:mapper/*.xml
+  type-handlers-package: com.af.common.configs
+
 pagehelper:
   helperDialect: mysql
   reasonable: true

@@ -85,7 +85,7 @@ public abstract class BaseService<M extends BaseMapper<T>, T extends BaseEntity<
      * @return true if success
      */
     public boolean update(T entity) {
-        entity.setModifyDate(DateUtil.asDate(LocalDate.now()));
+        entity.setModifyDate(new Date());
         return mapper.update(entity) > 0;
     }
 

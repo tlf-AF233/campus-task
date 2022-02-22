@@ -27,7 +27,7 @@ public class BaseEntity<T> implements Serializable {
     protected Integer isDeleted;
 
     public void initEntity() {
-        Date currentDate = DateUtil.asDate(LocalDate.now());
+        Date currentDate = new Date();
         this.id = IPGen.generateId();
         this.createDate = currentDate;
         this.modifyDate = currentDate;

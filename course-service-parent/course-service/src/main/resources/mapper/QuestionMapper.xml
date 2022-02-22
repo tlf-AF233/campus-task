@@ -11,7 +11,7 @@
         <result column="score" property="score"/>
         <result column="question_analysis" property="questionAnalysis"/>
         <result column="question_answer" property="questionAnswer"/>
-        <result column="items" property="items" typeHandler="com.af.common.config.JsonObjectHandler"/>
+        <result column="items" property="items" typeHandler="com.af.common.configs.JsonObjectHandler"/>
         <result column="create_date" property="createDate" javaType="java.util.Date" jdbcType="TIMESTAMP"/>
         <result column="modify_date" property="modifyDate" javaType="java.util.Date" jdbcType="TIMESTAMP"/>
     </resultMap>
@@ -38,9 +38,21 @@
         <if test="questionId != null and questionId != ''">
             and a.question_id = #{questionId}
         </if>
+        <if test="courseId != null and courseId != ''">
+            and a.course_id = #{courseId}
+        </if>
+        <if test="questionType != null and questionType != ''">
+            and a.question_type = #{questionType}
+        </if>
     </sql>
 
     <select id="findList" resultMap="questionResultMap">
+        <include refid="selectQuestion"/>
+        WHERE a.is_deleted = 0
+        <include refid="whereColumnList"/>
+    </select>
+
+    <select id="get" resultMap="questionResultMap">
         <include refid="selectQuestion"/>
         WHERE a.is_deleted = 0
         <include refid="whereColumnList"/>
@@ -72,19 +84,43 @@
             #{score},
             #{questionAnalysis},
             #{questionAnswer},
-            #{items, jdbcType=OTHER, typeHandler=com.af.common.config.JsonObjectHandler},
+            #{items, jdbcType=OTHER, typeHandler=com.af.common.configs.JsonObjectHandler},
             #{createDate, jdbcType=TIMESTAMP, javaType=java.util.Date},
             #{modifyDate, jdbcType=TIMESTAMP, javaType=java.util.Date},
             #{isDeleted, jdbcType=INTEGER}
         );
     </insert>
 
+    <update id="update">
+        update question set
+        <if test="questionName != null and questionName != ''">
+            question_name = #{questionName},
+        </if>
+        <if test="score != null and score != ''">
+            score = #{score},
+        </if>
+        <if test="questionAnswer != null and questionAnswer != ''">
+            question_answer = #{questionAnswer},
+        </if>
+        <if test="questionDifficulty != null and questionDifficulty != ''">
+            question_difficulty = #{questionDifficulty},
+        </if>
+        <if test="items != null and items != ''">
+            items = #{items, jdbcType=OTHER, typeHandler=com.af.common.configs.JsonObjectHandler},
+        </if>
+        <if test="questionAnalysis != null and questionAnalysis != ''">
+            question_analysis = #{questionAnalysis},
+        </if>
+        modify_date = #{modifyDate, jdbcType=TIMESTAMP, javaType=java.util.Date}
+        where question_id = #{questionId}
+    </update>
+
     <select id="existQuestionId" resultType="int">
         select ifnull((select 1 from question where question_id = #{questionId} and is_deleted = 0 limit 1), 0)
     </select>
 
     <update id="delete">
-        UPDATE question set is_deleted = 1 WHERE question_id = #{question_id}
+        UPDATE question set is_deleted = 1 WHERE question_id = #{questionId}
     </update>
 
 </mapper>

@@ -8,8 +8,6 @@ public enum QuestionTypeEnum {
 
     // 选择
     choice,
-    // 填空
-    gap,
     // 代码
     code
 }
