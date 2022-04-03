@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.af.course.mapper.WorkDetailMapper">
+    <resultMap id="workDetailResultMap" type="com.af.course.api.entity.WorkDetail">
+        <id column="id" property="id"/>
+        <result column="course_id" property="courseId"/>
+        <result column="lesson_id" property="lessonId"/>
+        <result column="status" property="status"/>
+        <result column="user_id" property="userId"/>
+        <result column="learning_title" property="learningTitle"/>
+        <result column="create_date" property="createDate" javaType="java.util.Date" jdbcType="TIMESTAMP"/>
+        <result column="modify_date" property="modifyDate" javaType="java.util.Date" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <sql id="selectWorkDetail">
+        SELECT
+            a.id,
+            a.course_id,
+            a.lesson_id,
+            a.status,
+            a.user_id,
+            a.learning_title,
+            a.create_date,
+            a.modify_date
+        FROM work_detail a
+    </sql>
+
+    <!-- where 条件 -->
+    <sql id="whereColumnList">
+        <if test="userId != null and userId != ''">
+            and a.user_id = #{userId}
+        </if>
+        <if test="courseId != null and courseId != ''">
+            and a.course_id = #{courseId}
+        </if>
+        <if test="lessonId != null and lessonId != ''">
+            and a.lesson_id = #{lessonId}
+        </if>
+        <if test="status != null and status != ''">
+            and a.status = #{status}
+        </if>
+        <if test="learningTitle != null and learningTitle != ''">
+            and a.learning_title = #{learningTitle}
+        </if>
+    </sql>
+
+    <select id="get" resultMap="workDetailResultMap">
+        <include refid="selectWorkDetail"/>
+        WHERE a.is_deleted = 0
+        <include refid="whereColumnList"/>
+    </select>
+
+    <select id="findList" resultMap="workDetailResultMap">
+        <include refid="selectWorkDetail"/>
+        WHERE a.is_deleted = 0
+        <include refid="whereColumnList"/>
+    </select>
+
+    <select id="countByStatus" resultType="com.af.course.api.vo.StudyDetailVo">
+        select sum(status = 'OVERTIME') as `overTime`, sum(status = 'UNFINISHED') as `unFinished`, sum(status = 'FINISHED') as `finished`
+        from work_detail a
+        WHERE a.is_deleted = 0 and a.learning_title = #{learningTitle} and a.course_id = #{courseId}
+    </select>
+
+    <select id="findCourseList" resultType="com.af.course.api.entity.Course">
+        select c.* from course c left join work_detail t on t.course_id = c.course_id where t.user_id = #{userId}
+    </select>
+
+    <select id="countByCourseId" resultType="int">
+        select count(distinct user_id) from work_detail where course_id = #{courseId}
+    </select>
+
+    <insert id="insert">
+        insert into work_detail (
+            id,
+            course_id,
+            lesson_id,
+            status,
+            user_id,
+            learning_title,
+            create_date,
+            modify_date,
+            is_deleted
+        ) values (
+            #{id},
+            #{courseId},
+            #{lessonId},
+            #{status},
+            #{userId},
+            #{learningTitle},
+            #{createDate, jdbcType=TIMESTAMP, javaType=java.util.Date},
+            #{modifyDate, jdbcType=TIMESTAMP, javaType=java.util.Date},
+            #{isDeleted, jdbcType=INTEGER}
+        );
+    </insert>
+
+    <update id="update">
+        UPDATE work_detail set
+        <if test="status != null and status != ''">
+            status = #{status},
+        </if>
+        modify_date = #{modifyDate, jdbcType=TIMESTAMP, javaType=java.util.Date}
+        where user_id = #{userId} and course_id = #{courseId} and learning_title = #{learningTitle} and lesson_id = #{lessonId}
+    </update>
+
+
+    <update id="delete">
+        UPDATE work_detail set is_deleted = 1 WHERE user_id = #{userId}
+    </update>
+
+</mapper>

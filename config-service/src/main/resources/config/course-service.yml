@@ -9,6 +9,22 @@ spring:
     password: ${MYSQL_PASSWORD:741236985}
     type: com.zaxxer.hikari.HikariDataSource
     driver-class-name: com.mysql.cj.jdbc.Driver
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+    #这个配置是保证提供者确保消息推送到交换机中，不管成不成功，都会回调
+    publisher-confirm-type: correlated
+    #保证交换机能把消息推送到队列中
+    publisher-returns: true
+    virtual-host: /
+    #这个配置是保证消费者会消费消息，手动确认
+    listener:
+      simple:
+        acknowledge-mode: manual
+    template:
+      mandatory: true
   cloud:
     consul:
       host: 127.0.0.1 #consul注册中心的ip地址

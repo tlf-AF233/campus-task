@@ -6,8 +6,10 @@ import com.af.common.utils.JwtUtil;
 import com.af.common.utils.PageUtil;
 import com.af.common.vo.PageVO;
 import com.af.course.api.entity.Course;
+import com.af.course.api.entity.Trainee;
 import com.af.course.api.vo.*;
 import com.af.course.service.CourseService;
+import com.af.course.service.TraineeService;
 import com.github.pagehelper.PageInfo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -27,6 +29,8 @@ import java.util.List;
 public class CourseController {
 
     private final CourseService courseService;
+
+    private final TraineeService traineeService;
 
     @ApiOperation("添加课程")
     @PostMapping("/add")
@@ -49,7 +53,15 @@ public class CourseController {
         return new ResponseBean<>(courseService.delete(course));
     }
 
-    @ApiOperation("学生端查看课程")
+    @ApiOperation("学生选课")
+    @PostMapping("/addTrainee")
+    public ResponseBean<Boolean> addTrainee(@RequestHeader(TokenConstants.TOKEN_HEADER) String token,
+                                            @RequestParam("id") String courseId) {
+
+        return new ResponseBean<>(traineeService.addTrainee(token, courseId));
+    }
+
+    @ApiOperation("学生端查看选课列表")
     @PostMapping("/searchByStudent")
     public ResponseBean<PageVO<CourseSelectedVo>> findCourseByStudent(@RequestHeader(TokenConstants.TOKEN_HEADER) String token,
                                                                       @RequestBody CourseQueryDto courseQueryDto) {
@@ -67,5 +79,10 @@ public class CourseController {
         return new ResponseBean<>(courseService.findList(course));
     }
 
+    @ApiOperation("学生查看课程")
+    @GetMapping("/myCourses")
+    public ResponseBean<List<Course>> findMyCourse(@RequestHeader(TokenConstants.TOKEN_HEADER) String token) {
+        return new ResponseBean<>(traineeService.listByStudentCourses(token));
+    }
 
 }

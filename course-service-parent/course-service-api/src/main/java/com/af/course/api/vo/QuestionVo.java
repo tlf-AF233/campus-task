@@ -13,6 +13,10 @@ import java.util.List;
 public class QuestionVo {
 
     private String questionId;
+    private String learningId;
+    private boolean finish;
+    private Integer isPassed;
+    private String submitContent;
     private String questionName;
     private String questionAnalysis;
     private String questionAnswer;

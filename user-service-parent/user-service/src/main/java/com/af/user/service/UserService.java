@@ -102,7 +102,7 @@ public class UserService extends BaseService<UserMapper, User> {
     public LoginVo login(LoginRequest loginRequest) {
         User user = new User();
         String username = loginRequest.getUsername();
-        if (username.length() == 11) {
+        if (!username.contains("@")) {
             user.setPhone(username);
         } else {
             user.setEmail(username);

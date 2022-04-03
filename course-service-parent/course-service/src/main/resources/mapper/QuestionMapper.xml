@@ -4,6 +4,7 @@
     <resultMap id="questionResultMap" type="com.af.course.api.entity.Question">
         <id column="id" property="id"/>
         <result column="course_id" property="courseId"/>
+        <result column="learning_id" property="learningId"/>
         <result column="question_id" property="questionId"/>
         <result column="question_name" property="questionName"/>
         <result column="question_type" property="questionType"/>
@@ -33,6 +34,23 @@
         FROM question a
     </sql>
 
+    <sql id="selectQuestionLearning">
+        SELECT
+            l.id as learning_id,
+            a.course_id,
+            a.question_id,
+            a.question_name,
+            a.question_type,
+            a.question_difficulty,
+            a.score,
+            a.question_analysis,
+            a.question_answer,
+            a.items,
+            a.create_date,
+            a.modify_date
+        FROM question a left join learning l on l.question_id = a.question_id
+    </sql>
+
     <!-- where 条件 -->
     <sql id="whereColumnList">
         <if test="questionId != null and questionId != ''">
@@ -50,6 +68,16 @@
         <include refid="selectQuestion"/>
         WHERE a.is_deleted = 0
         <include refid="whereColumnList"/>
+    </select>
+
+    <select id="findLimitDate" resultType="java.util.Date">
+        select l.limit_date from question q left join learning l on q.question_id = l.question_id
+        where l.id = #{learningId}
+    </select>
+
+    <select id="findLearningQuestionList" resultMap="questionResultMap">
+        <include refid="selectQuestionLearning"/>
+        where a.is_deleted = 0 and l.learning_title = #{learningTitle}
     </select>
 
     <select id="get" resultMap="questionResultMap">

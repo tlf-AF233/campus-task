@@ -3,6 +3,7 @@ package com.af.course.api.entity;
 import cn.hutool.json.JSONObject;
 import com.af.common.base.BaseEntity;
 import com.af.common.utils.DateUtil;
+import com.af.course.api.constant.QuestionTypeEnum;
 import com.af.course.api.vo.QuestionVo;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -21,6 +22,7 @@ import java.util.List;
 public class Question extends BaseEntity<Question> {
 
     private String questionId;
+    private String learningId;
     private String questionName;
     private String questionAnalysis;
     private String questionAnswer;
@@ -47,7 +49,9 @@ public class Question extends BaseEntity<Question> {
             default: break;
         }
 
-        questionVo.setItems(this.getItems().get("info", List.class));
+        if (this.getQuestionType().equals(QuestionTypeEnum.choice.name())) {
+            questionVo.setItems(this.getItems().get("info", List.class));
+        }
         questionVo.setCreateDate(DateUtil.formatDateString(this.getCreateDate()));
 
         return questionVo;

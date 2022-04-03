@@ -3,6 +3,7 @@ package com.af.common.base;
 import com.af.common.constant.CommonConstants;
 import com.af.common.utils.DateUtil;
 import com.af.common.utils.IPGen;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -19,7 +20,7 @@ public class BaseEntity<T> implements Serializable {
     private static final long serialVersionUID = 1L;
 
     protected Long id;
-
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     protected Date createDate;
 
     protected Date modifyDate;

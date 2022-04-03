@@ -35,6 +35,10 @@
         <include refid="whereColumnList"/>
     </select>
 
+    <select id="findCourseList" resultType="com.af.course.api.entity.Course">
+        select c.* from course c left join trainee t on t.course_id = c.course_id where t.user_id = #{userId}
+    </select>
+
     <select id="countByCourseId" resultType="int">
         select count(distinct user_id) from trainee where course_id = #{courseId}
     </select>

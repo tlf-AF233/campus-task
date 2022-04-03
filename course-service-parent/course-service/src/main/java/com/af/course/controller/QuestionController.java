@@ -1,18 +1,24 @@
 package com.af.course.controller;
 
+import com.af.common.constant.TokenConstants;
 import com.af.common.model.ResponseBean;
+import com.af.common.utils.JwtUtil;
 import com.af.common.utils.PageUtil;
 import com.af.common.vo.PageVO;
 import com.af.course.api.entity.Question;
+import com.af.course.api.entity.QuestionSubmit;
 import com.af.course.api.vo.QuestionAddRequest;
 import com.af.course.api.vo.QuestionQueryDto;
 import com.af.course.api.vo.QuestionVo;
 import com.af.course.service.QuestionService;
+import com.af.course.service.QuestionSubmitService;
 import com.github.pagehelper.PageInfo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * @author Tanglinfeng
@@ -25,6 +31,8 @@ import org.springframework.web.bind.annotation.*;
 public class QuestionController {
 
     private final QuestionService questionService;
+
+    private final QuestionSubmitService questionSubmitService;
 
     @ApiOperation("添加题目")
     @PostMapping("/add")
@@ -64,6 +72,21 @@ public class QuestionController {
         Question question = new Question();
         question.setQuestionId(questionId);
         return new ResponseBean<>(questionService.delete(question));
+    }
+
+    @ApiOperation("查询作业中的题目列表")
+    @GetMapping("/findByLeaningTitle")
+    public ResponseBean<List<QuestionVo>> findLearningQuestion(@RequestHeader(TokenConstants.TOKEN_HEADER) String token,
+                                                               @RequestParam("learningTitle") String learningTitle) {
+        Long userId = JwtUtil.getUserId(token);
+        return new ResponseBean<>(questionService.findLearningQuestionList(userId.toString(), learningTitle));
+    }
+
+    @ApiOperation("提交题目")
+    @PostMapping("/submit")
+    public ResponseBean<Boolean> submit(@RequestHeader(TokenConstants.TOKEN_HEADER) String token,
+                                        @RequestBody QuestionSubmit questionSubmit) {
+        return new ResponseBean<>(questionService.submit(token, questionSubmit));
     }
 
 }

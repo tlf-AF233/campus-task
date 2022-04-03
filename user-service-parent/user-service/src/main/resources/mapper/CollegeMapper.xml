@@ -11,7 +11,7 @@
     <resultMap id="collegeMajorVoResultMap" type="com.af.user.api.vo.CollegeMajorVo">
         <result column="name" property="name"/>
         <result column="college_id" property="collegeId"/>
-        <collection property="majorVoList" ofType="com.af.user.api.entity.Major" select="selectMajors" column="college_id"/>
+        <collection property="majorVoList" ofType="com.af.user.api.vo.MajorVo" select="selectMajors" column="college_id"/>
     </resultMap>
 
     <resultMap id="collegeTeacherVoResultMap" type="com.af.user.api.vo.CollegeTeacherVo">
@@ -51,6 +51,14 @@
         WHERE a.is_deleted = 0
     </select>
 
+    <select id="selectTeachers" resultType="com.af.user.api.entity.User">
+        select u.* from user u left join user_role ur on u.id = ur.user_id left join role r on r.id = ur.role_id
+            where u.college_id = #{collegeId} and r.role_code = 'TEACHER'
+    </select>
+
+    <select id="selectMajors" resultType="com.af.user.api.vo.MajorVo">
+        select id, college_id, major_id, major_name, class_no, grade from major where college_id = #{collegeId}
+    </select>
 
 
     <select id="selectCollegeMajorVo" resultMap="collegeMajorVoResultMap">

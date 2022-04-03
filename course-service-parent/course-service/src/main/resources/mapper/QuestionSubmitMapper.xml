@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.af.course.mapper.QuestionSubmitMapper">
+    <resultMap id="questionSubmitResultMap" type="com.af.course.api.entity.QuestionSubmit">
+        <id column="id" property="id"/>
+        <result column="learning_id" property="learningId"/>
+        <result column="course_id" property="courseId"/>
+        <result column="user_id" property="userId"/>
+        <result column="score" property="score"/>
+        <result column="submit_content" property="submitContent"/>
+        <result column="is_passed" property="isPassed"/>
+        <result column="create_date" property="createDate" javaType="java.util.Date" jdbcType="TIMESTAMP"/>
+        <result column="modify_date" property="modifyDate" javaType="java.util.Date" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <sql id="selectQuestionSubmit">
+        SELECT
+            a.id,
+            a.learning_id,
+            a.course_id,
+            a.score,
+            a.user_id,
+            a.submit_content,
+            a.is_passed,
+            a.create_date,
+            a.modify_date
+        FROM question_submit a
+    </sql>
+
+    <!-- where 条件 -->
+    <sql id="whereColumnList">
+        <if test="userId != null and userId != ''">
+            and a.user_id = #{userId}
+        </if>
+        <if test="learningId != null and learningId != ''">
+            and a.learning_id = #{learningId}
+        </if>
+    </sql>
+
+    <select id="findList" resultMap="questionSubmitResultMap">
+        <include refid="selectQuestionSubmit"/>
+        WHERE a.is_deleted = 0
+        <include refid="whereColumnList"/>
+    </select>
+
+    <select id="countByCourseId" resultType="int">
+        select count(distinct user_id) from question_submit where learning_id = #{learningId}
+    </select>
+
+    <select id="get" resultMap="questionSubmitResultMap">
+        <include refid="selectQuestionSubmit"/>
+        WHERE a.is_deleted = 0
+        <include refid="whereColumnList"/>
+    </select>
+
+    <select id="getUserScoreTop10" resultType="com.af.course.api.vo.StudentScoreVo">
+        select user_id, sum(score) as `score` from question_submit where course_id = #{courseId} group by user_id order by sum(score) desc limit 10
+    </select>
+
+    <select id="findUserScore" resultType="int">
+        select sum(score) from question_submit where course_id = #{courseId} and user_id = #{userId}
+    </select>
+
+    <insert id="insert">
+        insert into question_submit (
+            id,
+            learning_id,
+            course_id,
+            score,
+            user_id,
+            submit_content,
+            is_passed,
+            create_date,
+            modify_date,
+            is_deleted
+        ) values (
+            #{id},
+            #{learningId},
+            #{courseId},
+            #{score},
+            #{userId},
+            #{submitContent},
+            #{isPassed},
+            #{createDate, jdbcType=TIMESTAMP, javaType=java.util.Date},
+            #{modifyDate, jdbcType=TIMESTAMP, javaType=java.util.Date},
+            #{isDeleted, jdbcType=INTEGER}
+        );
+    </insert>
+
+    <select id="countByLearning" resultType="int">
+        select count(1) from learning l left join question_submit qs on l.id = qs.learning_id
+        where qs.user_id = #{userId} and l.learning_title = #{learningTitle}
+    </select>
+
+
+    <update id="delete">
+        UPDATE question_submit set is_deleted = 1 WHERE user_id = #{userId}
+    </update>
+
+</mapper>

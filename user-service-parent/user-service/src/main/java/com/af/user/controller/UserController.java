@@ -15,6 +15,9 @@ import io.swagger.annotations.ApiOperation;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * @author Tanglinfeng
  * @date 2022/2/8 16:32
@@ -90,5 +93,15 @@ public class UserController {
     @GetMapping("/{id}")
     public ResponseBean<User> findUserById(@PathVariable("id") Long id) {
         return new ResponseBean<>(userService.getById(id));
+    }
+
+    @ApiOperation("查询用户列表")
+    @GetMapping("/listByIds")
+    public ResponseBean<List<User>> findUserListByIds(@RequestParam("ids") List<String> ids) {
+        Long[] longIds = new Long[ids.size()];
+        for (int i = 0; i < ids.size(); i++) {
+            longIds[i] = Long.parseLong(ids.get(i));
+        }
+        return new ResponseBean<>(userService.findListById(longIds));
     }
 }
