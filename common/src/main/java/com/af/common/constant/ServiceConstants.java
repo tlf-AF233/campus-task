@@ -8,5 +8,7 @@ public class ServiceConstants {
 
     public static final String USER_SERVICE = "user-service";
 
-    public static final String COURSE_SERVICE = "course-serivce";
+    public static final String COURSE_SERVICE = "course-service";
+
+    public static final String CODE_SERVICE = "code-service";
 }

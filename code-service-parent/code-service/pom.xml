@@ -10,28 +10,16 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>course-service</artifactId>
+    <artifactId>code-service</artifactId>
     <name>${project.artifactId}</name>
-    <description>课程服务</description>
+    <description>代码服务</description>
 
     <properties>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
+        <maven.compiler.source>8</maven.compiler.source>
+        <maven.compiler.target>8</maven.compiler.target>
     </properties>
 
     <dependencies>
-        <dependency>
-            <groupId>com.af</groupId>
-            <artifactId>course-service-api</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.af</groupId>
-            <artifactId>user-service-api</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
-        </dependency>
-
         <dependency>
             <groupId>com.af</groupId>
             <artifactId>code-service-api</artifactId>
@@ -41,6 +29,13 @@
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-consul-discovery</artifactId>
+            <exclusions>
+                <!-- Causes java.lang.NoSuchMethodError: javax.ws.rs.core.Response$Status$Family.familyOf(I)Ljavax/ws/rs/core/Response$Status$Family; -->
+                <exclusion>
+                    <groupId>javax.ws.rs</groupId>
+                    <artifactId>jsr311-api</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <!-- 配置客户端 -->
@@ -51,19 +46,23 @@
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-test</artifactId>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
 
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-jdbc</artifactId>
+            <groupId>com.github.docker-java</groupId>
+            <artifactId>docker-java</artifactId>
+            <version>3.2.7</version>
+            <exclusions>
+                <!-- Causes java.lang.NoSuchMethodError: javax.ws.rs.core.Response$Status$Family.familyOf(I)Ljavax/ws/rs/core/Response$Status$Family; -->
+                <exclusion>
+                    <groupId>javax.ws.rs</groupId>
+                    <artifactId>jsr311-api</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
+
+
 
     </dependencies>
 

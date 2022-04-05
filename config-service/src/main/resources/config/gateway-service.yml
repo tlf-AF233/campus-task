@@ -19,6 +19,13 @@ spring:
             - Path=/api/course/**
           filters:
             - StripPrefix=2
+
+        - id: code-service
+          uri: http://localhost:8803
+          predicates:
+            - Path=/api/code/**
+          filters:
+            - StripPrefix=2
       # 跨域
       globalcors:
         corsConfigurations:

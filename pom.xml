@@ -12,6 +12,9 @@
         <module>course-service-parent/course-service-api</module>
         <module>course-service-parent/course-service</module>
         <module>gateway-service</module>
+        <module>code-service-parent</module>
+        <module>code-service-parent/code-service-api</module>
+        <module>code-service-parent/code-service</module>
     </modules>
     <parent>
         <groupId>org.springframework.boot</groupId>

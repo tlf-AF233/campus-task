@@ -4,23 +4,21 @@ import cn.hutool.core.net.URLDecoder;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
+import com.af.code.api.feign.CodeServiceClient;
+import com.af.code.api.vo.CodeRequestDto;
 import com.af.common.base.BaseService;
+import com.af.common.constant.DefaultResultCode;
 import com.af.common.exceptions.BusinessException;
+import com.af.common.model.ResponseBean;
 import com.af.common.utils.JwtUtil;
 import com.af.common.utils.LogUtil;
 import com.af.common.vo.PageVO;
-import com.af.course.api.constant.CourseMqConstant;
-import com.af.course.api.constant.CourseResultCode;
-import com.af.course.api.constant.QuestionDifficultyEnum;
-import com.af.course.api.constant.WorkStatusEnum;
+import com.af.course.api.constant.*;
 import com.af.course.api.entity.Learning;
 import com.af.course.api.entity.Question;
 import com.af.course.api.entity.QuestionSubmit;
 import com.af.course.api.entity.WorkDetail;
-import com.af.course.api.vo.QuestionAddRequest;
-import com.af.course.api.vo.QuestionItem;
-import com.af.course.api.vo.QuestionVo;
-import com.af.course.api.vo.ScoreMessage;
+import com.af.course.api.vo.*;
 import com.af.course.mapper.LearningMapper;
 import com.af.course.mapper.QuestionMapper;
 import com.af.course.mapper.QuestionSubmitMapper;
@@ -60,6 +58,48 @@ public class QuestionService extends BaseService<QuestionMapper, Question> {
 
     private final RabbitTemplate rabbitTemplate;
 
+    private final CodeServiceClient codeServiceClient;
+
+
+    /**
+     * 提交代码
+     *
+     * @param token
+     * @param questionSubmit
+     * @return
+     */
+    public CodeRunResult submitCode(String token, QuestionSubmit questionSubmit) {
+        questionSubmit.initEntity();
+        Long userId = JwtUtil.getUserId(token);
+        questionSubmit.setUserId(userId.toString());
+
+        LogUtil.info(log, "代码题提交: {}", questionSubmit);
+        String codeExecResult = runCode(questionSubmit.getSubmitContent());
+
+        String learningId = questionSubmit.getLearningId();
+        Question questionEntity = this.mapper.findByLearningId(learningId);
+        // 计算得分
+        Date limitDate = this.mapper.findLimitDate(learningId);
+        boolean overtime = questionSubmit.getCreateDate().after(limitDate);
+        boolean accept = questionEntity.getQuestionAnswer().equals(codeExecResult);
+
+        if (!accept || overtime) {
+            questionSubmit.setScore(0);
+            questionSubmit.setIsPassed(0);
+        } else {
+            questionSubmit.setScore(questionEntity.getScore());
+        }
+        if (accept) {
+            questionSubmit.setIsPassed(1);
+        }
+
+        if (dealWorkDetail(questionSubmit, userId, overtime)) {
+            return new CodeRunResult(accept, codeExecResult);
+        } else {
+            return null;
+        }
+    }
+
     /**
      * 提交题目
      *
@@ -80,45 +120,7 @@ public class QuestionService extends BaseService<QuestionMapper, Question> {
             questionSubmit.setScore(0);
         }
 
-
-
-        if (questionSubmitMapper.insert(questionSubmit) > 0) {
-            // 处理作业完成进度
-            Learning learning = new Learning();
-            learning.setId(Long.valueOf(questionSubmit.getLearningId()));
-            Learning resultLearning = learningMapper.get(learning);
-            int submitQuestionNum = questionSubmitMapper.countByLearning(userId.toString(), resultLearning.getLearningTitle());
-            int totalQuestionNum = learningMapper.findMaxLearning(resultLearning.getLearningTitle());
-
-            // 发mq计算得分
-            if (questionSubmit.getScore() > 0) {
-                ScoreMessage message = ScoreMessage.builder()
-                        .courseId(questionSubmit.getCourseId())
-                        .userId(questionSubmit.getUserId())
-                        .build();
-                rabbitTemplate.convertAndSend(CourseMqConstant.UPDATE_SCORE_EXCHANGE, null, message);
-            }
-            if (submitQuestionNum == totalQuestionNum) {
-                // 判断本次作业题目是否做完
-                WorkDetail workDetail = new WorkDetail();
-                workDetail.setUserId(userId.toString());
-                workDetail.setLearningTitle(resultLearning.getLearningTitle());
-                workDetail.setCourseId(questionSubmit.getCourseId());
-                workDetail.setLessonId(resultLearning.getLessonId());
-                workDetail.setModifyDate(new Date());
-                if (overtime) {
-                    workDetail.setStatus(WorkStatusEnum.OVERTIME.name());
-                } else {
-                    workDetail.setStatus(WorkStatusEnum.FINISHED.name());
-                }
-                return workDetailMapper.update(workDetail) > 0;
-            } else {
-                return true;
-            }
-        } else {
-            LogUtil.error(log, "题目提交失败 {}", questionSubmit);
-            return false;
-        }
+        return dealWorkDetail(questionSubmit, userId, overtime);
     }
 
     /**
@@ -215,6 +217,67 @@ public class QuestionService extends BaseService<QuestionMapper, Question> {
             }
         }
         return null;
+    }
+
+    /**
+     * 处理作业提交后续逻辑
+     *
+     * @param questionSubmit
+     * @param userId
+     * @param overtime
+     * @return
+     */
+    private boolean dealWorkDetail(QuestionSubmit questionSubmit, Long userId, boolean overtime) {
+        if (questionSubmitMapper.insert(questionSubmit) > 0) {
+            // 处理作业完成进度
+            Learning learning = new Learning();
+            learning.setId(Long.valueOf(questionSubmit.getLearningId()));
+            Learning resultLearning = learningMapper.get(learning);
+            int submitQuestionNum = questionSubmitMapper.countByLearning(userId.toString(), resultLearning.getLearningTitle());
+            int totalQuestionNum = learningMapper.findMaxLearning(resultLearning.getLearningTitle());
+
+            // 发mq计算得分
+            if (questionSubmit.getScore() > 0) {
+                ScoreMessage message = ScoreMessage.builder()
+                        .courseId(questionSubmit.getCourseId())
+                        .userId(questionSubmit.getUserId())
+                        .build();
+                rabbitTemplate.convertAndSend(CourseMqConstant.UPDATE_SCORE_EXCHANGE, null, message);
+            }
+            if (submitQuestionNum == totalQuestionNum) {
+                // 判断本次作业题目是否做完
+                WorkDetail workDetail = new WorkDetail();
+                workDetail.setUserId(userId.toString());
+                workDetail.setLearningTitle(resultLearning.getLearningTitle());
+                workDetail.setCourseId(questionSubmit.getCourseId());
+                workDetail.setLessonId(resultLearning.getLessonId());
+                workDetail.setModifyDate(new Date());
+                if (overtime) {
+                    workDetail.setStatus(WorkStatusEnum.OVERTIME.name());
+                } else {
+                    workDetail.setStatus(WorkStatusEnum.FINISHED.name());
+                }
+                return workDetailMapper.update(workDetail) > 0;
+            } else {
+                return true;
+            }
+        } else {
+            LogUtil.error(log, "题目提交失败 {}", questionSubmit);
+            return false;
+        }
+    }
+
+    private String runCode(String sourceCode) {
+        CodeRequestDto codeRequestDto = new CodeRequestDto();
+        codeRequestDto.setSourceCode(sourceCode);
+
+        ResponseBean<String> runCodeResponseBean = codeServiceClient.runCode(codeRequestDto);
+        if (!runCodeResponseBean.isSuccess()) {
+            LogUtil.error(log, "code服务调用失败！{}", runCodeResponseBean.getMsg());
+            throw new BusinessException(DefaultResultCode.FAIL);
+        }
+
+        return runCodeResponseBean.getData();
     }
 
 }

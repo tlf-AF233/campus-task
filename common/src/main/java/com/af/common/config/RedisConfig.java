@@ -1,4 +1,4 @@
-package com.af.course.config;
+package com.af.common.config;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
@@ -17,8 +17,8 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
  * @author Tanglinfeng
  * @date 2022/3/29 20:16
  */
-//@Configuration
-//@EnableCaching
+@Configuration
+@EnableCaching
 public class RedisConfig {
 
     @Bean

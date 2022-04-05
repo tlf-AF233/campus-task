@@ -7,6 +7,7 @@ import com.af.common.utils.PageUtil;
 import com.af.common.vo.PageVO;
 import com.af.course.api.entity.Question;
 import com.af.course.api.entity.QuestionSubmit;
+import com.af.course.api.vo.CodeRunResult;
 import com.af.course.api.vo.QuestionAddRequest;
 import com.af.course.api.vo.QuestionQueryDto;
 import com.af.course.api.vo.QuestionVo;
@@ -89,4 +90,10 @@ public class QuestionController {
         return new ResponseBean<>(questionService.submit(token, questionSubmit));
     }
 
+    @ApiOperation("提交代码题")
+    @PostMapping("/submitCode")
+    public ResponseBean<CodeRunResult> submitCode(@RequestHeader(TokenConstants.TOKEN_HEADER) String token,
+                                                  @RequestBody QuestionSubmit questionSubmit) {
+        return new ResponseBean<>(questionService.submitCode(token, questionSubmit));
+    }
 }

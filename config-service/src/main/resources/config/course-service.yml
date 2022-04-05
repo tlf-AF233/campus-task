@@ -61,6 +61,7 @@ feign:
     enabled: true
   user-service: localhost:8801
   course-service: localhost:8802
+  code-service: localhost:8803
 
 # hystrix配置
 hystrix:

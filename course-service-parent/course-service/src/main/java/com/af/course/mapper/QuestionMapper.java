@@ -20,4 +20,6 @@ public interface QuestionMapper extends BaseMapper<Question> {
     List<Question> findLearningQuestionList(String learningTitle);
 
     Date findLimitDate(@Param("learningId") String learningId);
+
+    Question findByLearningId(@Param("learningId") String learningId);
 }

@@ -75,6 +75,11 @@
         where l.id = #{learningId}
     </select>
 
+    <select id="findByLearningId" resultMap="questionResultMap">
+        select q.* from question q left join learning l on q.question_id = l.question_id
+        where l.id = #{learningId}
+    </select>
+
     <select id="findLearningQuestionList" resultMap="questionResultMap">
         <include refid="selectQuestionLearning"/>
         where a.is_deleted = 0 and l.learning_title = #{learningTitle}
