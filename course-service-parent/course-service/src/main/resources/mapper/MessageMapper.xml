@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.af.course.mapper.MessageMapper">
+    <resultMap id="messageResultMap" type="com.af.course.api.entity.Message">
+        <id column="id" property="id"/>
+        <result column="course_id" property="courseId"/>
+        <result column="message_title" property="messageTitle"/>
+        <result column="message_content" property="messageContent"/>
+        <result column="create_user" property="createUser"/>
+        <result column="modify_user" property="modifyUser"/>
+        <result column="create_date" property="createDate" javaType="java.util.Date" jdbcType="TIMESTAMP"/>
+        <result column="modify_date" property="modifyDate" javaType="java.util.Date" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <sql id="selectMessage">
+        SELECT
+            a.id,
+            a.course_id,
+            a.message_title,
+            a.message_content,
+            a.create_user,
+            a.modify_user,
+            a.create_date,
+            a.modify_date
+        FROM message a
+    </sql>
+
+    <sql id="selectMessageVo">
+        SELECT
+            a.id,
+            a.course_id,
+            c.course_name,
+            a.message_title,
+            a.message_content,
+            a.create_user,
+            a.modify_user,
+            a.create_date,
+            a.modify_date
+        FROM course c left join message a on c.course_id = a.course_id
+    </sql>
+
+    <!-- where 条件 -->
+    <sql id="whereColumnList">
+        <if test="createUser != null and createUser != ''">
+            and a.create_user = #{createUser}
+        </if>
+        <if test="courseId != null and courseId != ''">
+            and a.course_id = #{courseId}
+        </if>
+    </sql>
+
+    <select id="findList" resultMap="messageResultMap">
+        <include refid="selectMessage"/>
+        WHERE a.is_deleted = 0
+        <include refid="whereColumnList"/>
+    </select>
+
+    <select id="getById" resultMap="messageResultMap">
+        <include refid="selectMessage"/>
+        WHERE a.is_deleted = 0 and a.id = #{id}
+    </select>
+
+
+    <insert id="insert">
+        insert into message (
+            id,
+            course_id,
+            message_title,
+            message_content,
+            create_user,
+            modify_user,
+            create_date,
+            modify_date,
+            is_deleted
+        ) values (
+            #{id},
+            #{courseId},
+            #{messageTitle},
+            #{messageContent},
+            #{createUser},
+            #{modifyUser},
+            #{createDate, jdbcType=TIMESTAMP, javaType=java.util.Date},
+            #{modifyDate, jdbcType=TIMESTAMP, javaType=java.util.Date},
+            #{isDeleted, jdbcType=INTEGER}
+        );
+    </insert>
+
+    <update id="update">
+        update message set
+        <if test="messageTitle != null and messageTitle != ''">
+            message_title = #{messageTitle},
+        </if>
+        <if test="messageContent != null and messageContent != ''">
+            message_content = #{messageContent},
+        </if>
+        modify_date = #{modifyDate, jdbcType=TIMESTAMP, javaType=java.util.Date},
+        modify_user = #{modifyUser}
+        where id = #{id}
+    </update>
+
+    <select id="selectMessageVo" resultType="com.af.course.api.vo.StudentMessageVo">
+        <include refid="selectMessageVo"/>
+        where a.is_deleted = 0 and a.course_id in
+        <foreach collection="courseIdList" separator="," item="id" open="(" close=")">
+            #{id}
+        </foreach>
+    </select>
+
+    <update id="deleteById">
+        update message set is_deleted = 1 where id = #{id}
+    </update>
+
+</mapper>

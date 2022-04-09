@@ -7,4 +7,6 @@ package com.af.course.api.constant;
 public class CourseRedisConstant {
 
     public static final String SCORE_REDIS_PREFIX = "score:";
+
+    public static final String MESSAGE_REDIS_PREFIX = "message:";
 }
