@@ -35,4 +35,8 @@ public class BaseEntity<T> implements Serializable {
         this.modifyDate = currentDate;
         this.isDeleted = CommonConstants.UN_DELETED;
     }
+
+    public boolean isNewRecord() {
+        return this.getId() == null;
+    }
 }

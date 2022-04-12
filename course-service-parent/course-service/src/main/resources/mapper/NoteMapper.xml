@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.af.course.mapper.NoteMapper">
+    <resultMap id="noteResultMap" type="com.af.course.api.entity.Note">
+        <id column="id" property="id"/>
+        <result column="note_title" property="noteTitle"/>
+        <result column="note_content" property="noteContent"/>
+        <result column="user_id" property="userId"/>
+        <result column="create_date" property="createDate" javaType="java.util.Date" jdbcType="TIMESTAMP"/>
+        <result column="modify_date" property="modifyDate" javaType="java.util.Date" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <sql id="selectNote">
+        SELECT
+            a.id,
+            a.note_title,
+            a.note_content,
+            a.user_id,
+            a.create_date,
+            a.modify_date
+        FROM note a
+    </sql>
+
+    <!-- where 条件 -->
+    <sql id="whereColumnList">
+        <if test="noteTitle != null and noteTitle != ''">
+            and a.note_title like concat(#{noteTitle}, '%')
+        </if>
+        <if test="userId != null and userId != ''">
+            and a.user_id = #{userId}
+        </if>
+    </sql>
+
+    <select id="findList" resultMap="noteResultMap">
+        <include refid="selectNote"/>
+        WHERE a.is_deleted = 0
+        <include refid="whereColumnList"/>
+    </select>
+
+    <select id="getById" resultMap="noteResultMap">
+        <include refid="selectNote"/>
+        WHERE a.is_deleted = 0 and a.id = #{id}
+    </select>
+
+
+    <insert id="insert">
+        insert into note (
+            id,
+            note_title,
+            note_content,
+            user_id,
+            create_date,
+            modify_date,
+            is_deleted
+        ) values (
+            #{id},
+            #{noteTitle},
+            #{noteContent},
+            #{userId},
+            #{createDate, jdbcType=TIMESTAMP, javaType=java.util.Date},
+            #{modifyDate, jdbcType=TIMESTAMP, javaType=java.util.Date},
+            #{isDeleted, jdbcType=INTEGER}
+        );
+    </insert>
+
+    <update id="update">
+        update note set
+        <if test="noteTitle != null and noteTitle != ''">
+            note_title = #{noteTitle},
+        </if>
+        <if test="noteContent != null and noteContent != ''">
+            note_content = #{noteContent},
+        </if>
+        modify_date = #{modifyDate, jdbcType=TIMESTAMP, javaType=java.util.Date}
+        where id = #{id}
+    </update>
+
+
+    <update id="deleteById">
+        update note set is_deleted = 1 where id = #{id}
+    </update>
+
+</mapper>

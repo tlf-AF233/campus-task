@@ -106,4 +106,20 @@ public abstract class BaseService<M extends BaseMapper<T>, T extends BaseEntity<
     public boolean deleteAll(Long[] ids) {
         return mapper.deleteAll(ids) > 0;
     }
+
+    /**
+     * 插入或更新
+     *
+     * @param entity
+     * @return
+     */
+    public boolean save(T entity) {
+        if (entity.isNewRecord()) {
+            entity.initEntity();
+            return mapper.insert(entity) > 0;
+        } else {
+            entity.setModifyDate(new Date());
+            return mapper.update(entity) > 0;
+        }
+    }
 }
