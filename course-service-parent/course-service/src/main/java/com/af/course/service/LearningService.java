@@ -7,6 +7,7 @@ import com.af.common.utils.PageUtil;
 import com.af.common.vo.PageVO;
 import com.af.course.api.constant.WorkStatusEnum;
 import com.af.course.api.entity.Learning;
+import com.af.course.api.entity.Message;
 import com.af.course.api.entity.Trainee;
 import com.af.course.api.entity.WorkDetail;
 import com.af.course.api.vo.LearningAddRequest;
@@ -40,6 +41,8 @@ public class LearningService extends BaseService<LearningMapper, Learning> {
     private final TraineeMapper traineeMapper;
 
     private final WorkDetailMapper workDetailMapper;
+
+    private final MessageService messageService;
 
     public PageVO<LessonLearningVo> findLearningList(PageInfo<LessonLearningVo> pageInfo, Learning learning) {
         PageHelper.startPage(pageInfo.getPageNum(), pageInfo.getPageSize());
@@ -140,6 +143,16 @@ public class LearningService extends BaseService<LearningMapper, Learning> {
                 return false;
             }
         }
+
+        // 布置作业后发公告提醒
+        Message message = new Message();
+        message.initEntity();
+        message.setCourseId(learningAddRequest.getCourseId());
+        message.setMessageTitle("新作业提醒");
+        message.setMessageContent("同学您好，新作业已布置！截止时间为" + learningAddRequest.getLimitDate() + "。请注意分配时间~");
+        message.setCreateUser("系统消息");
+
+        messageService.addMessage(message);
 
         return true;
     }

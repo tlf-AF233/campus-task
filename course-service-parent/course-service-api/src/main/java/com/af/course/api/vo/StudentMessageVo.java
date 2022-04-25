@@ -12,6 +12,7 @@ import java.util.Date;
 @Data
 public class StudentMessageVo {
 
+    private String id;
     private String courseId;
     private String courseName;
     private String createUser;

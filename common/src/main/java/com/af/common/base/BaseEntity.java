@@ -1,13 +1,12 @@
 package com.af.common.base;
 
 import com.af.common.constant.CommonConstants;
-import com.af.common.utils.DateUtil;
 import com.af.common.utils.IPGen;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
 import java.io.Serializable;
-import java.time.LocalDate;
 import java.util.Date;
 
 /**
@@ -36,6 +35,7 @@ public class BaseEntity<T> implements Serializable {
         this.isDeleted = CommonConstants.UN_DELETED;
     }
 
+    @JsonIgnore
     public boolean isNewRecord() {
         return this.getId() == null;
     }

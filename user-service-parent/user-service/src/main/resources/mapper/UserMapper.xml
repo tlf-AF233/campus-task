@@ -153,6 +153,9 @@
         <if test="sex != null and sex != ''">
             and a.sex = #{sex}
         </if>
+        <if test="openId != null and openId != ''">
+            and a.open_id = #{openId}
+        </if>
     </sql>
 
     <select id="findStudentList" resultMap="studentVoResultMap">

@@ -71,7 +71,7 @@ public class MessageService extends BaseService<MessageMapper, Message> {
      */
     public void readMessage(String token) {
         Long userId = JwtUtil.getUserId(token);
-        redisTemplate.opsForValue().set(CourseRedisConstant.MESSAGE_REDIS_PREFIX + userId.toString(), 1);
+        redisTemplate.opsForValue().setIfAbsent(CourseRedisConstant.MESSAGE_REDIS_PREFIX + userId.toString(), 1);
     }
 
     /**

@@ -55,3 +55,6 @@ hystrix:
           thread:
             timeoutInMilliseconds: 60000
 
+wechat:
+  appId: wx271afc2e30e155cd
+  appSecret: 04388d59f33e06bfc8076d07ed5a3637

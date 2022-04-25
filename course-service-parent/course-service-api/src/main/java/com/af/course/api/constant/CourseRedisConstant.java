@@ -9,4 +9,6 @@ public class CourseRedisConstant {
     public static final String SCORE_REDIS_PREFIX = "score:";
 
     public static final String MESSAGE_REDIS_PREFIX = "message:";
+
+    public static final String CHECK_IN_REDIS_PREFIX = "check_in:";
 }

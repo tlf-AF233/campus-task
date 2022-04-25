@@ -33,6 +33,9 @@
         <if test="courseTeacherId != null and courseTeacherId != ''">
             and a.course_teacher_id = #{courseTeacherId}
         </if>
+        <if test="courseId != null and courseId != ''" >
+            and a.course_id = #{courseId}
+        </if>
     </sql>
 
     <select id="findList" resultMap="courseResultMap">
@@ -73,6 +76,11 @@
         group by c.id
     </select>
 
+    <select id="get" resultMap="courseResultMap">
+        <include refid="selectCourse"/>
+        WHERE a.is_deleted = 0
+        <include refid="whereColumnList"/>
+    </select>
 
     <insert id="insert">
         insert into course (

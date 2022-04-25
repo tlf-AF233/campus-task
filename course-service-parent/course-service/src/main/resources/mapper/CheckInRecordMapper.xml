@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.af.course.mapper.CheckInRecordMapper">
+    <resultMap id="checkInRecordResultMap" type="com.af.course.api.entity.CheckInRecord">
+        <id column="id" property="id"/>
+        <result column="check_in_time" property="checkInTime" javaType="java.util.Date" jdbcType="TIMESTAMP"/>
+        <result column="check_in_name" property="checkInName"/>
+        <result column="user_id" property="userId"/>
+        <result column="course_id" property="courseId"/>
+        <result column="status" property="status"/>
+        <result column="create_date" property="createDate" javaType="java.util.Date" jdbcType="TIMESTAMP"/>
+        <result column="modify_date" property="modifyDate" javaType="java.util.Date" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <resultMap id="checkInRecordVoResultMap" type="com.af.course.api.vo.CheckInRecordVo">
+        <result column="check_in_time" property="checkInTime" javaType="java.util.Date" jdbcType="TIMESTAMP"/>
+        <result column="check_in_name" property="checkInName"/>
+        <result column="user_id" property="userId"/>
+        <result column="name" property="name"/>
+        <result column="student_id" property="studentId"/>
+        <result column="course_id" property="courseId"/>
+        <result column="status" property="status"/>
+    </resultMap>
+
+    <sql id="selectCheckInRecord">
+        SELECT
+            a.id,
+            a.check_in_time,
+            a.check_in_name,
+            a.user_id,
+            a.course_id,
+            a.status,
+            a.create_date,
+            a.modify_date
+        FROM check_in_record a
+    </sql>
+
+    <sql id="selectCheckInRecordVo">
+        SELECT
+            a.id,
+            a.check_in_time,
+            a.check_in_name,
+            a.user_id,
+            a.course_id,
+            u.name,
+            u.student_id,
+            a.status,
+            a.create_date,
+            a.modify_date
+        FROM check_in_record a left join `campus-user`.`user` u on a.user_id = u.id
+    </sql>
+
+    <!-- where 条件 -->
+    <sql id="whereColumnList">
+        <if test="checkInName != null and checkInName != ''">
+            and a.check_in_name = #{checkInName}
+        </if>
+        <if test="userId != null and userId != ''">
+            and a.user_id = #{userId}
+        </if>
+        <if test="courseId != null and courseId != ''">
+            and a.course_id = #{courseId}
+        </if>
+        <if test="status != null and status != ''">
+            and a.status = #{status}
+        </if>
+    </sql>
+
+    <select id="findList" resultMap="checkInRecordResultMap">
+        <include refid="selectCheckInRecord"/>
+        WHERE a.is_deleted = 0
+        <include refid="whereColumnList"/>
+    </select>
+
+    <select id="findCheckInNameList" resultType="String">
+        select distinct check_in_name from check_in_record where course_id = #{courseId}
+    </select>
+
+    <select id="findVoList" resultMap="checkInRecordVoResultMap">
+        <include refid="selectCheckInRecordVo"/>
+        WHERE a.is_deleted = 0
+        <include refid="whereColumnList"/>
+        <if test="name != null and name != ''">
+            and u.name = #{name}
+        </if>
+        <if test="studentId != null and studentId != ''">
+            and u.student_id = #{studentId}
+        </if>
+    </select>
+
+    <select id="countUnfinishedTimes" resultType="long">
+        select sum(status = 'UNFINISHED') from check_in_record where user_id = #{userId} and course_id = #{courseId} group by user_id
+    </select>
+
+    <select id="getById" resultMap="checkInRecordResultMap">
+        <include refid="selectCheckInRecord"/>
+        WHERE a.is_deleted = 0 and a.id = #{id}
+    </select>
+
+
+    <insert id="insert">
+        insert into check_in_record (
+            id,
+            check_in_time,
+            check_in_name,
+            user_id,
+            course_id,
+            status,
+            create_date,
+            modify_date,
+            is_deleted
+        ) values (
+            #{id},
+            #{checkInTime, jdbcType=TIMESTAMP, javaType=java.util.Date},
+            #{checkInName},
+            #{userId},
+            #{courseId},
+            #{status},
+            #{createDate, jdbcType=TIMESTAMP, javaType=java.util.Date},
+            #{modifyDate, jdbcType=TIMESTAMP, javaType=java.util.Date},
+            #{isDeleted, jdbcType=INTEGER}
+        );
+    </insert>
+
+    <update id="update">
+        update check_in_record set
+        <if test="checkInTime != null and checkInTime != ''">
+            check_in_time = #{checkInTime, jdbcType=TIMESTAMP, javaType=java.util.Date},
+        </if>
+        <if test="checkInName != null and checkInName != ''">
+            check_in_name = #{checkInName},
+        </if>
+        <if test="status != null and status != ''">
+            status = #{status},
+        </if>
+        modify_date = #{modifyDate, jdbcType=TIMESTAMP, javaType=java.util.Date}
+        where id = #{id}
+    </update>
+
+    <update id="updateStatus">
+        update check_in_record set
+        <if test="checkInTime != null">
+            check_in_time = #{checkInTime, jdbcType=TIMESTAMP, javaType=java.util.Date},
+        </if>
+        <if test="status != null and status != ''">
+            status = #{status},
+        </if>
+        modify_date = #{modifyDate, jdbcType=TIMESTAMP, javaType=java.util.Date}
+        where check_in_name = #{checkInName} and user_id = #{userId}
+    </update>
+
+    <select id="findLatestStatus" resultType="String">
+        select status from check_in_record where user_id = #{userId} and course_id = #{courseId} order by create_date desc limit 1
+    </select>
+
+    <update id="deleteById">
+        update checkInRecord set is_deleted = 1 where id = #{id}
+    </update>
+
+</mapper>

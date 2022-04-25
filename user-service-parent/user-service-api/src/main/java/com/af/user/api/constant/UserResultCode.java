@@ -17,6 +17,7 @@ public enum UserResultCode implements ResultCode {
     USER_STUDENT_ID_EXIST(1003, "学号存在"),
     LOGIN_FAILED(1004, "用户名或密码错误"),
     OLD_PASSWORD_WRONG(1005, "旧密码输入错误"),
+    NOT_BIND_OPENID(1006, "用户未绑定OpenId"),
 
     ;
 

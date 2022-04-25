@@ -41,5 +41,7 @@ ignore:
     - /swagger-resources/**
     - /api/user/v1/user/login
     - /api/user/v1/user/register
+    - /api/user/v1/wx/checkBind
+    - /api/user/v1/wx/bind
     - /api/user/v1/college/list
     - /api/**/v2/api-docs
